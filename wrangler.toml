@@ -1,0 +1,13 @@
+name = "cruise-deck-mcp"
+main = "src/index.ts"
+compatibility_date = "2025-04-01"
+compatibility_flags = ["nodejs_compat"]
+
+# Set via `wrangler secret put DATABASE_URL` for production.
+# For local dev, copy .dev.vars.example to .dev.vars and fill in values.
+[vars]
+# Non-secret config goes here.
+
+# [[hyperdrive]]
+# binding = "HYPERDRIVE"
+# id = "<hyperdrive-id>"

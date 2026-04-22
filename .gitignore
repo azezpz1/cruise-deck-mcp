@@ -137,3 +137,17 @@ dist
 # Vite logs files
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
+
+# Cloudflare / wrangler
+.wrangler/
+.dev.vars
+wrangler.toml.bak
+
+# Bun
+bun.lockb
+
+# Drizzle
+drizzle/
+
+# Claude Code local settings
+.claude/

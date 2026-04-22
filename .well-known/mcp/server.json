@@ -1,0 +1,28 @@
+{
+  "$schema": "https://modelcontextprotocol.io/schemas/server.json",
+  "name": "cruise-deck-mcp",
+  "version": "0.1.0",
+  "description": "MCP server for cruise ship deck plans and cabin noise analysis",
+  "transport": {
+    "type": "http",
+    "endpoint": "/mcp"
+  },
+  "tools": [
+    {
+      "name": "get_cabin_info",
+      "description": "Look up details for a specific cabin on a specific ship."
+    },
+    {
+      "name": "find_quiet_cabins",
+      "description": "Find the quietest cabins on a ship, optionally filtered by category."
+    },
+    {
+      "name": "compare_cabins",
+      "description": "Compare two or more cabins on the same ship side by side."
+    },
+    {
+      "name": "get_deck_layout",
+      "description": "Return the layout of a single deck — cabins and amenities."
+    }
+  ]
+}

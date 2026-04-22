@@ -1,0 +1,31 @@
+{
+  "name": "cruise-deck-mcp",
+  "version": "0.1.0",
+  "private": true,
+  "description": "MCP server for cruise ship deck plans and cabin noise analysis",
+  "type": "module",
+  "scripts": {
+    "dev": "npx wrangler dev",
+    "deploy": "npx wrangler deploy",
+    "typecheck": "tsc --noEmit",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
+    "db:studio": "drizzle-kit studio",
+    "ingest:seed": "bun run ingestion/seed.ts",
+    "ingest:extract": "bun run ingestion/extract.ts"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "drizzle-orm": "^0.45.2",
+    "hono": "^4.12.14",
+    "postgres": "^3.4.9",
+    "zod": "^4.3.6"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20260422.1",
+    "bun-types": "^1.3.13",
+    "drizzle-kit": "^0.31.10",
+    "typescript": "^6.0.3",
+    "wrangler": "^4.84.1"
+  }
+}
