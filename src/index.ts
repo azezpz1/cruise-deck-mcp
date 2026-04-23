@@ -1,5 +1,7 @@
 import { Hono } from "hono";
+import { sql } from "drizzle-orm";
 
+import { createDb } from "./db/client";
 import { getCabinInfo } from "./tools/get-cabin-info";
 import { findQuietCabins } from "./tools/find-quiet-cabins";
 import { compareCabins } from "./tools/compare-cabins";
@@ -79,6 +81,18 @@ app.get("/.well-known/mcp/server.json", (c) =>
     transport: { type: "http", endpoint: "/mcp" },
   }),
 );
+
+app.get("/health/db", async (c) => {
+  const url = c.env.DATABASE_URL;
+  if (!url) return c.json({ ok: false, error: "DATABASE_URL not set" }, 500);
+  try {
+    const db = createDb(url);
+    const rows = await db.execute<{ ok: number }>(sql`select 1 as ok`);
+    return c.json({ ok: rows[0]?.ok === 1 });
+  } catch (e) {
+    return c.json({ ok: false, error: (e as Error).message }, 500);
+  }
+});
 
 app.post("/mcp", async (c) => {
   const body = (await c.req.json()) as JsonRpcRequest;

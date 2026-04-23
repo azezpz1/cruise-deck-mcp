@@ -1,1 +1,5 @@
-DATABASE_URL=postgresql://postgres:postgres@localhost:5432/postgres
+# Supabase Postgres connection string.
+# Use the Transaction pooler (port 6543) — Cloudflare Workers can't hold
+# persistent connections, and src/db/client.ts sets `prepare: false` to match.
+# Find it in Supabase: Project Settings → Database → Connection string → Transaction.
+DATABASE_URL=postgresql://postgres.[PROJECT-REF]:[PASSWORD]@aws-0-[REGION].pooler.supabase.com:6543/postgres

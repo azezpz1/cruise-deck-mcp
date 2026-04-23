@@ -29,6 +29,13 @@ npx wrangler dev
 `bun` stays the package manager and is fine for everything else (ingestion
 scripts, type-checking, drizzle-kit). Only the wrangler process needs node.
 
+## Local dev gotcha — `.dev.vars` is not hot-reloaded
+
+`wrangler dev` loads `.dev.vars` once at startup. Editing the file during a
+running session does nothing — the worker keeps the old values (or `undefined`
+for vars added after startup). Restart `wrangler dev` after any `.dev.vars`
+change.
+
 ## MCP transport — manual JSON-RPC dispatch
 
 `src/index.ts` does **not** use `@modelcontextprotocol/sdk`'s `McpServer` +
