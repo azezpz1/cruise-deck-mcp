@@ -56,6 +56,33 @@ bun run db:migrate    # apply pending migrations to DATABASE_URL
 bun run db:studio     # open Drizzle Studio
 ```
 
+### Migration workflow
+
+Migrations are SQL files in `migrations/`, generated from `src/db/schema.ts` and
+committed to the repo. A migration is applied to a database exactly once —
+drizzle-kit tracks applied migrations in a `__drizzle_migrations` table.
+
+**When making a schema change:**
+
+1. Edit `src/db/schema.ts`.
+2. Run `bun run db:generate`. This writes a new `migrations/NNNN_<name>.sql`
+   plus a snapshot under `migrations/meta/`. Commit both.
+3. Open a PR. Review the generated SQL — rename files are auto-detected but
+   ambiguous renames may be generated as drop+create (data loss).
+4. On merge to `main`, CI applies the migration (see below).
+
+**Applying migrations:**
+
+- **CI (production):** `.github/workflows/migrate.yml` runs `bun run db:migrate`
+  on every push to `main` that touches `migrations/**` or `drizzle.config.ts`.
+  The job runs in the `production` GitHub Environment — set the `DATABASE_URL`
+  secret there, and add a required reviewer on the environment so migrations
+  need an explicit approval click before they apply. Can also be triggered
+  manually from the Actions tab (`workflow_dispatch`).
+- **Local:** `bun run db:migrate` against your own Supabase project /
+  `.dev.vars`. Avoid running this against the shared production database —
+  let CI do it.
+
 ## Status
 
 Scaffolding only. Tool handlers return stub responses. Ingestion pipeline and
