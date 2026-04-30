@@ -109,7 +109,7 @@ Inspect / rotate:
 
 ```bash
 npx wrangler secret list
-npx wrangler secret put DATABASE_URL     # overwrites
+npx wrangler secret put DATABASE_URL     # overwrites if it exists
 npx wrangler secret delete DATABASE_URL
 ```
 
@@ -138,6 +138,13 @@ approval click — same pattern as the `migrate` workflow. The Worker's
 
 `workflow_dispatch` is enabled, so you can also trigger a deploy manually from
 the Actions tab.
+
+The `deploy` and `migrate` workflows fire independently on push to `main` —
+disjoint path filters, separate concurrency groups, no cross-workflow ordering.
+If a single PR ships both a schema migration and code that depends on it,
+deploy can finish before migrate and the new code will hit the old schema.
+Land the migration in its own PR first, wait for `migrate.yml` to complete,
+then merge the code PR.
 
 ## Status
 
