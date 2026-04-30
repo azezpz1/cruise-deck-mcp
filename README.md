@@ -83,6 +83,62 @@ drizzle-kit tracks applied migrations in a `__drizzle_migrations` table.
   `.dev.vars`. Avoid running this against the shared production database —
   let CI do it.
 
+## Production deployment
+
+The Worker reads `DATABASE_URL` from a Cloudflare secret binding (the same name
+as the local `.dev.vars` key). Once set, it's available on `env` inside the
+Worker — `src/index.ts` exposes it as `c.env.DATABASE_URL` and consumes it from
+`/health/db`.
+
+### One-time secret setup
+
+Push the Supabase Transaction-pooler URL to the production Worker:
+
+```bash
+npx wrangler secret put DATABASE_URL
+# paste the connection string when prompted
+```
+
+Or non-interactively (don't leave the value in shell history):
+
+```bash
+printf '%s' "$DATABASE_URL" | npx wrangler secret put DATABASE_URL
+```
+
+Inspect / rotate:
+
+```bash
+npx wrangler secret list
+npx wrangler secret put DATABASE_URL     # overwrites
+npx wrangler secret delete DATABASE_URL
+```
+
+Verify the binding is reachable from the deployed Worker:
+
+```bash
+curl -s https://<worker-host>/health/db
+# {"ok":true}
+```
+
+### CI deploys
+
+`.github/workflows/deploy.yml` runs `npx wrangler deploy` on every push to
+`main` that touches `src/**`, `wrangler.toml`, or worker-relevant config.
+Wrangler authenticates non-interactively from two repository secrets:
+
+| Secret | Source |
+| --- | --- |
+| `CLOUDFLARE_API_TOKEN` | Cloudflare dashboard → My Profile → API Tokens. Use the **Edit Cloudflare Workers** template, scoped to the account that owns this Worker. |
+| `CLOUDFLARE_ACCOUNT_ID` | Cloudflare dashboard → Workers & Pages overview (right sidebar). |
+
+Set both under the `production` GitHub Environment so deploys can require an
+approval click — same pattern as the `migrate` workflow. The Worker's
+`DATABASE_URL` is **not** in GitHub: it lives only in Cloudflare's secret store
+(set via `wrangler secret put` above) and is bound at runtime.
+
+`workflow_dispatch` is enabled, so you can also trigger a deploy manually from
+the Actions tab.
+
 ## Status
 
 Scaffolding only. Tool handlers return stub responses. Ingestion pipeline and
