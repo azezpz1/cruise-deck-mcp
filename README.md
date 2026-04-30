@@ -73,15 +73,79 @@ drizzle-kit tracks applied migrations in a `__drizzle_migrations` table.
 
 **Applying migrations:**
 
-- **CI (production):** `.github/workflows/migrate.yml` runs `bun run db:migrate`
-  on every push to `main` that touches `migrations/**` or `drizzle.config.ts`.
-  The job runs in the `production` GitHub Environment — set the `DATABASE_URL`
-  secret there, and add a required reviewer on the environment so migrations
-  need an explicit approval click before they apply. Can also be triggered
-  manually from the Actions tab (`workflow_dispatch`).
+- **CI (production):** `.github/workflows/deploy.yml` runs `bun run db:migrate`
+  as the first job on every push to `main` that touches the worker code,
+  `migrations/**`, or `drizzle.config.ts`. The job runs in the `production`
+  GitHub Environment — set the `DATABASE_URL` secret there, and add a required
+  reviewer on the environment so migrations need an explicit approval click
+  before they apply. Can also be triggered manually from the Actions tab
+  (`workflow_dispatch`).
 - **Local:** `bun run db:migrate` against your own Supabase project /
   `.dev.vars`. Avoid running this against the shared production database —
   let CI do it.
+
+## Production deployment
+
+The Worker reads `DATABASE_URL` from a Cloudflare secret binding (the same name
+as the local `.dev.vars` key). Once set, it's available on `env` inside the
+Worker — `src/index.ts` exposes it as `c.env.DATABASE_URL` and consumes it from
+`/health/db`.
+
+### One-time secret setup
+
+Push the Supabase Transaction-pooler URL to the production Worker:
+
+```bash
+npx wrangler secret put DATABASE_URL
+# paste the connection string when prompted
+```
+
+Or non-interactively (don't leave the value in shell history):
+
+```bash
+printf '%s' "$DATABASE_URL" | npx wrangler secret put DATABASE_URL
+```
+
+Inspect / rotate:
+
+```bash
+npx wrangler secret list
+npx wrangler secret put DATABASE_URL     # overwrites if it exists
+npx wrangler secret delete DATABASE_URL
+```
+
+Verify the binding is reachable from the deployed Worker:
+
+```bash
+curl -s https://<worker-host>/health/db
+# {"ok":true}
+```
+
+### CI deploys
+
+`.github/workflows/deploy.yml` runs on every push to `main` that touches
+worker code, migrations, or related config. It has two jobs in sequence:
+`migrate` (drizzle-kit migrate) and `deploy` (typecheck + `wrangler deploy`),
+with `deploy` gated on `needs: migrate`. This guarantees a new schema is in
+place before code that depends on it ships — and since drizzle-kit tracks
+applied migrations, the migrate job is a no-op when nothing has changed.
+
+Wrangler authenticates non-interactively from two repository secrets:
+
+| Secret | Source |
+| --- | --- |
+| `CLOUDFLARE_API_TOKEN` | Cloudflare dashboard → My Profile → API Tokens. Use the **Edit Cloudflare Workers** template, scoped to the account that owns this Worker. |
+| `CLOUDFLARE_ACCOUNT_ID` | Cloudflare dashboard → Workers & Pages overview (right sidebar). |
+
+Both jobs run under the `production` GitHub Environment, so each one prompts
+for approval if reviewers are configured (one click for migrate, one for
+deploy). `DATABASE_URL` is set on the environment for the migrate job; the
+Worker's runtime `DATABASE_URL` is **not** in GitHub — it lives only in
+Cloudflare's secret store (set via `wrangler secret put` above) and is bound
+at runtime.
+
+`workflow_dispatch` is enabled, so you can also trigger the pipeline manually
+from the Actions tab.
 
 ## Status
 
