@@ -8,6 +8,13 @@
       "when": 1776987030095,
       "tag": "0000_fresh_dark_beast",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1777813495818,
+      "tag": "0001_continuous_coords_bbox_spaces",
+      "breakpoints": true
     }
   ]
 }

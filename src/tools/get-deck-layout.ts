@@ -1,6 +1,6 @@
 export const getDeckLayout = {
   name: "get_deck_layout",
-  description: "Return the layout of a single deck — cabins and amenities.",
+  description: "Return the layout of a single deck — cabins and spaces.",
   inputSchema: {
     type: "object",
     properties: {
