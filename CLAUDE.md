@@ -57,10 +57,31 @@ Each tool lives in `src/tools/<name>.ts` and exports `{ name, description,
 inputSchema, handler }`. JSON Schema is written by hand for the `inputSchema`;
 zod is in deps for runtime arg validation when handlers stop being stubs.
 
+## Ingestion
+
+`ingestion/normalize.ts` is the thin layer between the YAML files under
+`data/ships/<slug>/` and the database. It validates with zod (schemas mirror
+`docs/data-schema.md`), maps to row-shaped output for `ships`/`decks`/
+`cabins`/`spaces`, and derives `cabin_space_proximity` rows via point-to-bbox
+euclidean distance (cutoffs `|vertical_decks| ≤ 3`, `horizontal_distance ≤ 30`).
+Cross-table FKs in the output use natural keys (deck number, cabin number,
+space `localIndex`) — UUIDs are generated at insert time, so the seed script
+resolves keys to ids per table.
+
+Run standalone to inspect output for one ship:
+
+```bash
+bun run ingestion/normalize.ts data/ships/<slug>
+```
+
+`ingestion/extract.ts` is a placeholder — v1 has no automated extractor;
+encoding happens interactively (paste screenshot → Claude emits YAML → user
+commits).
+
 ## Status
 
-Scaffolding only. The four tools all return `STUB:` text. Ingestion
-(`ingestion/extract.ts`, `ingestion/seed.ts`) and noise scoring
+Scaffolding plus a normalization layer. The four tools all return `STUB:` text.
+The seed script (`ingestion/seed.ts`) and noise scoring
 (`src/scoring/noise-score.ts`) are explicit next phases — don't expand them
 without the user asking.
 

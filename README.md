@@ -22,7 +22,7 @@ src/
   tools/              MCP tool handlers (stubs)
   db/                 Drizzle schema + Supabase client
   scoring/            Noise scoring logic (TBD)
-ingestion/            PDF/image → structured data (TBD, runs locally)
+ingestion/            YAML → row-shaped data → seed (runs locally under Bun)
 migrations/           Drizzle-generated SQL migrations
 .well-known/mcp/      MCP registry discovery
 ```
@@ -147,7 +147,28 @@ at runtime.
 `workflow_dispatch` is enabled, so you can also trigger the pipeline manually
 from the Actions tab.
 
+## Ingestion
+
+Deck plans are encoded as YAML under `data/ships/<slug>/` — one `ship.yaml`
+plus one `deck-<n>.yaml` per passenger deck. The contract Claude follows when
+encoding from a screenshot is `docs/data-schema.md`.
+
+`ingestion/normalize.ts` is the thin layer between the YAML and the database:
+it validates each file, maps to row-shaped output for `ships`, `decks`,
+`cabins`, `spaces`, and derives `cabin_space_proximity` rows by computing
+point-to-bbox euclidean distance from each cabin to spaces on nearby decks
+(`|vertical_decks| ≤ 3`, `horizontal_distance ≤ 30`). Run it standalone to
+inspect the output for a single ship:
+
+```bash
+bun run ingestion/normalize.ts data/ships/<slug>
+```
+
+The seed script (`ingestion/seed.ts`) consumes this output and writes to
+Supabase. It's a separate phase — see issue #8.
+
 ## Status
 
-Scaffolding only. Tool handlers return stub responses. Ingestion pipeline and
-noise scoring algorithm are separate phases.
+Scaffolding plus a normalization layer. Tool handlers still return stub
+responses. The seed script and the noise scoring algorithm are the next
+phases.
