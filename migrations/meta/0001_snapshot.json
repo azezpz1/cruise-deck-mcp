@@ -1,0 +1,718 @@
+{
+  "id": "47a5d38f-bfef-42d3-9142-f81a263583a2",
+  "prevId": "2dbb2112-1363-4fe1-80eb-5eacb674cdc4",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "public.cabin_space_proximity": {
+      "name": "cabin_space_proximity",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "cabin_id": {
+          "name": "cabin_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "space_id": {
+          "name": "space_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "vertical_decks": {
+          "name": "vertical_decks",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "horizontal_distance": {
+          "name": "horizontal_distance",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {
+        "cabin_space_proximity_uniq": {
+          "name": "cabin_space_proximity_uniq",
+          "columns": [
+            {
+              "expression": "cabin_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "space_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "cabin_space_proximity_cabin_idx": {
+          "name": "cabin_space_proximity_cabin_idx",
+          "columns": [
+            {
+              "expression": "cabin_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "cabin_space_proximity_space_idx": {
+          "name": "cabin_space_proximity_space_idx",
+          "columns": [
+            {
+              "expression": "space_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "cabin_space_proximity_space_vertical_idx": {
+          "name": "cabin_space_proximity_space_vertical_idx",
+          "columns": [
+            {
+              "expression": "space_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "vertical_decks",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "cabin_space_proximity_cabin_id_cabins_id_fk": {
+          "name": "cabin_space_proximity_cabin_id_cabins_id_fk",
+          "tableFrom": "cabin_space_proximity",
+          "tableTo": "cabins",
+          "columnsFrom": [
+            "cabin_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "cabin_space_proximity_space_id_spaces_id_fk": {
+          "name": "cabin_space_proximity_space_id_spaces_id_fk",
+          "tableFrom": "cabin_space_proximity",
+          "tableTo": "spaces",
+          "columnsFrom": [
+            "space_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "proximity_horizontal_distance_range": {
+          "name": "proximity_horizontal_distance_range",
+          "value": "\"cabin_space_proximity\".\"horizontal_distance\" BETWEEN 0 AND 100"
+        },
+        "proximity_vertical_decks_range": {
+          "name": "proximity_vertical_decks_range",
+          "value": "\"cabin_space_proximity\".\"vertical_decks\" BETWEEN -50 AND 50"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.cabins": {
+      "name": "cabins",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "deck_id": {
+          "name": "deck_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "number": {
+          "name": "number",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "category": {
+          "name": "category",
+          "type": "cabin_category",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "fore_aft": {
+          "name": "fore_aft",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "port_starboard": {
+          "name": "port_starboard",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "accessible": {
+          "name": "accessible",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "connecting": {
+          "name": "connecting",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "obstructed_view": {
+          "name": "obstructed_view",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "notes": {
+          "name": "notes",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {
+        "cabins_deck_number_uniq": {
+          "name": "cabins_deck_number_uniq",
+          "columns": [
+            {
+              "expression": "deck_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "number",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "cabins_category_idx": {
+          "name": "cabins_category_idx",
+          "columns": [
+            {
+              "expression": "category",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "cabins_deck_id_decks_id_fk": {
+          "name": "cabins_deck_id_decks_id_fk",
+          "tableFrom": "cabins",
+          "tableTo": "decks",
+          "columnsFrom": [
+            "deck_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "cabins_fore_aft_range": {
+          "name": "cabins_fore_aft_range",
+          "value": "\"cabins\".\"fore_aft\" BETWEEN 0 AND 100"
+        },
+        "cabins_port_starboard_range": {
+          "name": "cabins_port_starboard_range",
+          "value": "\"cabins\".\"port_starboard\" BETWEEN 0 AND 100"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.decks": {
+      "name": "decks",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "ship_id": {
+          "name": "ship_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "deck_number": {
+          "name": "deck_number",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "passenger": {
+          "name": "passenger",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": true
+        }
+      },
+      "indexes": {
+        "decks_ship_number_uniq": {
+          "name": "decks_ship_number_uniq",
+          "columns": [
+            {
+              "expression": "ship_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "deck_number",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "decks_ship_id_ships_id_fk": {
+          "name": "decks_ship_id_ships_id_fk",
+          "tableFrom": "decks",
+          "tableTo": "ships",
+          "columnsFrom": [
+            "ship_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.ships": {
+      "name": "ships",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "slug": {
+          "name": "slug",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "cruise_line": {
+          "name": "cruise_line",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "class": {
+          "name": "class",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "gross_tonnage": {
+          "name": "gross_tonnage",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "year_built": {
+          "name": "year_built",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "length_m": {
+          "name": "length_m",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "beam_m": {
+          "name": "beam_m",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "deck_count": {
+          "name": "deck_count",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "notes": {
+          "name": "notes",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {
+        "ships_slug_uniq": {
+          "name": "ships_slug_uniq",
+          "columns": [
+            {
+              "expression": "slug",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "ships_name_line_uniq": {
+          "name": "ships_name_line_uniq",
+          "columns": [
+            {
+              "expression": "name",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "cruise_line",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.spaces": {
+      "name": "spaces",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "deck_id": {
+          "name": "deck_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "type": {
+          "name": "type",
+          "type": "space_type",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "fore_aft_min": {
+          "name": "fore_aft_min",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "fore_aft_max": {
+          "name": "fore_aft_max",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "port_starboard_min": {
+          "name": "port_starboard_min",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "port_starboard_max": {
+          "name": "port_starboard_max",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "noise_level": {
+          "name": "noise_level",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "enclosed": {
+          "name": "enclosed",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": true
+        },
+        "open_to_above": {
+          "name": "open_to_above",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "open_to_below": {
+          "name": "open_to_below",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "notes": {
+          "name": "notes",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {
+        "spaces_deck_type_idx": {
+          "name": "spaces_deck_type_idx",
+          "columns": [
+            {
+              "expression": "deck_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "type",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "spaces_deck_id_decks_id_fk": {
+          "name": "spaces_deck_id_decks_id_fk",
+          "tableFrom": "spaces",
+          "tableTo": "decks",
+          "columnsFrom": [
+            "deck_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "spaces_fore_aft_bbox": {
+          "name": "spaces_fore_aft_bbox",
+          "value": "\"spaces\".\"fore_aft_min\" <= \"spaces\".\"fore_aft_max\" AND \"spaces\".\"fore_aft_min\" >= 0 AND \"spaces\".\"fore_aft_max\" <= 100"
+        },
+        "spaces_port_starboard_bbox": {
+          "name": "spaces_port_starboard_bbox",
+          "value": "\"spaces\".\"port_starboard_min\" <= \"spaces\".\"port_starboard_max\" AND \"spaces\".\"port_starboard_min\" >= 0 AND \"spaces\".\"port_starboard_max\" <= 100"
+        },
+        "spaces_noise_level_range": {
+          "name": "spaces_noise_level_range",
+          "value": "\"spaces\".\"noise_level\" BETWEEN 0 AND 100"
+        }
+      },
+      "isRLSEnabled": false
+    }
+  },
+  "enums": {
+    "public.cabin_category": {
+      "name": "cabin_category",
+      "schema": "public",
+      "values": [
+        "interior",
+        "oceanview",
+        "balcony",
+        "suite"
+      ]
+    },
+    "public.space_type": {
+      "name": "space_type",
+      "schema": "public",
+      "values": [
+        "nightclub",
+        "live_music_venue",
+        "theater",
+        "showroom",
+        "arcade",
+        "casino",
+        "bar",
+        "lounge",
+        "pool",
+        "splash_zone",
+        "waterslide",
+        "kids_club",
+        "teen_club",
+        "sports_court",
+        "atrium",
+        "main_dining_room",
+        "specialty_dining",
+        "buffet",
+        "cafe",
+        "shops",
+        "photo_studio",
+        "reception",
+        "guest_services",
+        "spa",
+        "gym",
+        "library",
+        "chapel",
+        "conference_room",
+        "lecture_hall",
+        "art_gallery",
+        "observation_lounge",
+        "medical",
+        "adults_only_lounge",
+        "elevator_bank",
+        "stairs",
+        "corridor",
+        "crew_area",
+        "galley",
+        "mechanical",
+        "laundry",
+        "restroom",
+        "storage",
+        "open_deck",
+        "sun_deck",
+        "promenade",
+        "jogging_track",
+        "helipad",
+        "other"
+      ]
+    }
+  },
+  "schemas": {},
+  "sequences": {},
+  "roles": {},
+  "policies": {},
+  "views": {},
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
+}
