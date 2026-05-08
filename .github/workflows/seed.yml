@@ -1,0 +1,68 @@
+name: Seed
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "data/ships/**"
+      - "ingestion/seed.ts"
+      - "ingestion/normalize.ts"
+      - "package.json"
+      - "bun.lock"
+      - ".github/workflows/seed.yml"
+  workflow_dispatch:
+    inputs:
+      ship:
+        description: "Ship slug to seed (leave blank to seed every ship under data/ships/)"
+        required: false
+        default: ""
+
+# Share the cf-deploy lock so seeds never overlap with migrations or another seed.
+concurrency:
+  group: cf-deploy
+  cancel-in-progress: false
+
+jobs:
+  seed:
+    name: ingest:seed
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    environment: production
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Seed ships
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          SHIP_INPUT: ${{ inputs.ship || '' }}
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          if [[ -n "${SHIP_INPUT}" ]]; then
+            target="data/ships/${SHIP_INPUT}"
+            if [[ ! -d "${target}" ]]; then
+              echo "ship dir not found: ${target}" >&2
+              exit 1
+            fi
+            ships=("${target}")
+          else
+            ships=(data/ships/*/)
+          fi
+          if [[ ${#ships[@]} -eq 0 ]]; then
+            echo "no ship directories under data/ships/ — nothing to seed"
+            exit 0
+          fi
+          for dir in "${ships[@]}"; do
+            slug="$(basename "${dir}")"
+            echo "::group::seeding ${slug}"
+            bun run ingest:seed --ship="${slug}"
+            echo "::endgroup::"
+          done
